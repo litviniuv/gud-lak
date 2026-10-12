@@ -12,11 +12,13 @@ function lock(){savedY=scrollY;root.style.scrollBehavior='auto';root.classList.a
 function unlock(){root.style.scrollBehavior='auto';body.style.position='';body.style.top='';body.style.left='';body.style.right='';body.style.width='';root.classList.remove('is-locked');jumpTo(savedY);releaseBehavior()}
 function show(){if(!menu)return;open=true;menu.hidden=false;lock();burger.setAttribute('aria-expanded','true');burger.setAttribute('aria-label','Закрыть меню');requestAnimationFrame(()=>menu.classList.add('is-open'))}
 function close(focus){if(!open)return;open=false;menu.classList.remove('is-open');menu.hidden=true;burger.setAttribute('aria-expanded','false');burger.setAttribute('aria-label','Открыть меню');unlock();if(focus)burger.focus({preventScroll:true})}
-function goTo(hash){const t=document.querySelector(hash);if(!t)return;history.replaceState(null,'',hash);
- requestAnimationFrame(()=>{if(Math.abs(scrollY-savedY)>2)jumpTo(savedY);const pad=parseFloat(getComputedStyle(root).scrollPaddingTop)||0;const y=Math.max(0,t.getBoundingClientRect().top+scrollY-pad);
- if(RM.matches)jumpTo(y);else scrollTo({top:y,left:0,behavior:'smooth'});const h=t.querySelector('h2')||t;h.setAttribute('tabindex','-1');h.focus({preventScroll:true})})}
+function goTo(hash,fromMenu){const t=document.querySelector(hash);if(!t)return;history.replaceState(null,'',hash);
+ requestAnimationFrame(()=>{if(fromMenu&&Math.abs(scrollY-savedY)>2)jumpTo(savedY);const pad=parseFloat(getComputedStyle(root).scrollPaddingTop)||0;const h=t.querySelector('h2')||t;
+ const y=Math.max(0,t.getBoundingClientRect().top+scrollY+(parseFloat(getComputedStyle(t).paddingTop)||0)-pad-16);if(RM.matches)jumpTo(y);else scrollTo({top:y,left:0,behavior:'smooth'});
+ h.setAttribute('tabindex','-1');h.focus({preventScroll:true})})}
+document.querySelectorAll('.nav a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{const h=a.getAttribute('href');if(h.length>1&&document.querySelector(h)){e.preventDefault();goTo(h,false)}}));
 if(burger&&menu){burger.addEventListener('click',()=>open?close(false):show());
- menu.addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;const h=a.getAttribute('href');if(h&&h[0]==='#'){e.preventDefault();close(false);goTo(h)}else close(false)});
+ menu.addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;const h=a.getAttribute('href');if(h&&h[0]==='#'){e.preventDefault();close(false);goTo(h,true)}else close(false)});
  addEventListener('keydown',e=>{if(e.key==='Escape'&&open)close(true)});
  matchMedia('(min-width: 960px)').addEventListener('change',m=>{if(m.matches)close(false)})}
 /* ---- reveal ---- */
